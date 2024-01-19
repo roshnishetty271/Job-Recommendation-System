@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend</title>
+    <style>
+        .container {
+            padding: 15px;
+        }
+
+        input {
+            font-size: 15px;
+        }
+
+        .label {
+            font-size: 15px;
+        }
+
+        .p {
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body style="background-color:#d1c1a5;">
+
+    <section class="container">
+        <form id="CompanyForm" onsubmit="return submitCompany(event)">
+            <h1>JOB RECOMMENDATION SYSTEM !</h1>
+            <p>*Enter your skillset to get a refined search on the list of companies</p>
+            <label for="EmpSkills"><b>Skills:</b></label><br>
+            <input type="text" id="EmpSkills" name="EmpSkills" style="height: 30px;" required><br>
+            <br><br>
+            <button type="submit" style="height: 30px;" onclick="submitCompany(event)">Submit</button>
+            <br><br>
+            <div id="resultCompany"></div>
+            <br><br>
+        </form>
+
+        <form id="JobPortalForm" onsubmit="return submitJobPortalForm(event)">
+            <p>*Enter the Job Role and Work type to get the list of job portals that match your requirement</p>
+            <label for="jobRole"><b>Job Role:</b></label><br>
+            <input type="text" id="jobRole" name="jobRole" style="height: 30px;" required><br>
+            <br><br>
+            <label for="workType"><b>Work Type:</b></label><br>
+            <input type="text" id="workType" name="workType" style="height: 30px;" required><br>
+            <br><br>
+            <button type="submit" style="height: 30px;" onclick="submitJobPortalForm(event)">Submit</button>
+            <br><br>
+            <div id="resultJobPortal"></div>
+            <br><br>
+        </form>
+
+        <form id="LocationForm" onsubmit="return submitLocationForm(event)">
+            <p>*Enter the location where you would like to work to based on the job title, job posting date, salary and skills</p>
+            <label for="EmpLocation"><b>Location:</b></label><br>
+            <input type="text" id="EmpLocation" name="EmpLocation" style="height: 30px;" required><br>
+            <br><br>
+            <button type="submit" style="height: 30px;" onclick="submitLocationForm(event)">Submit</button>
+            <br><br>
+            <div id="resultLocation"></div>
+            <br><br>
+        </form>
+
+        <form id="BenefitForm" onsubmit="return submitBenefitForm(event)">
+            <p>*Enter the current job title, job role, salary, location, and experience to provide insight into benefits</p>
+            <label for="JobTitle"><b>Job Title:</b></label><br>
+            <input type="text" id="JobTitle" name="JobTitle" style="height: 30px;" required><br>
+            <br><br>
+
+            <label for="jobRole"><b>Job Role:</b></label><br>
+            <input type="text" id="jobRoleBenefit" name="jobRole" style="height: 30px;" required><br>
+            <br><br>
+
+            <label for="EmpSalary"><b>Salary:</b></label><br>
+            <input type="text" id="EmpSalary" name="EmpSalary" style="height: 30px;" required><br>
+            <br><br>
+
+            <label for="EmpLocationBenefit"><b>Location:</b></label><br>
+            <input type="text" id="EmpLocationBenefit" name="EmpLocation" style="height: 30px;" required><br>
+            <br><br>
+
+            <label for="EmpExperience"><b>Experience:</b></label><br>
+            <input type="text" id="EmpExperience" name="EmpExperience" style="height: 30px;" required><br>
+            <br><br>
+
+            <button type="submit" style="height: 30px;" onclick="submitBenefitForm(event)">Submit</button>
+            <br><br>
+            <div id="resultBenefit"></div>
+            <br> <br>
+        </form>
+    </section>
+
+    <script>
+        async function submitCompany(event) {
+            event.preventDefault();
+            const EmpSkills = document.getElementById('EmpSkills').value;
+            if (!EmpSkills.trim()) {
+                alert('This field is required!');
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ queryType: 'skills', userskills: EmpSkills }),
+            });
+
+            const result = await response.json();
+            const companyList = result.map(item => item.Company).flat(); // Extract all Company arrays and flatten them
+          
+            if (companyList.length == 0) 
+            {
+                document.getElementById('resultCompany').innerHTML = '<b>No data found</b>';
+            } 
+            else 
+            {
+                const companyHTML = companyList.map(comp => `<li>${comp}</li>`).join('');
+                document.getElementById('resultCompany').innerHTML = `<ul>${companyHTML}</ul>`;
+            }
+        }
+
+        async function submitJobPortalForm(event) {
+            event.preventDefault();
+            const jobRole = document.getElementById('jobRole').value;
+            const workType = document.getElementById('workType').value;
+
+            if (!jobRole.trim() || !workType.trim()) {
+                alert('This field is required!');
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ queryType: 'jobRoleAndWorkType', userjobRole: jobRole, userworktype: workType }),
+            });
+
+            const result = await response.json();
+            const portalList = result.map(item => item.Job_Portal).flat(); // Extract all Portal arrays and flatten them
+            
+            if (portalList.length == 0) 
+            {
+                document.getElementById('resultJobPortal').innerHTML = '<b>No data found</b>';
+            } 
+            else 
+            {
+            const portalHTML = portalList.map(Portal => `<li>${Portal}</li>`).join('');
+            document.getElementById('resultJobPortal').innerHTML = `<ul>${portalHTML}</ul>`;
+            }
+        }
+
+        async function submitLocationForm(event) {
+            event.preventDefault();
+            const EmpLocation = document.getElementById('EmpLocation').value;
+            if (!EmpLocation.trim()) {
+                alert('This field is required!');
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ queryType: 'location', userEmpLocation: EmpLocation }),
+            });
+
+            const result = await response.json();
+            const JobTitleList = result.map(item => item.Job_Title).flat(); // Extract all Location arrays and flatten them 
+            const JobPostingDateList = result.map(item => item.Job_Posting_Date).flat(); // Extract all Location arrays and flatten them
+            const SalaryList = result.map(item => item.Salary).flat(); // Extract all Location arrays and flatten them  
+            const skillsList = result.map(item => item.skills).flat(); // Extract all Location arrays and flatten them
+
+            if (JobTitleList.length == 0 && JobPostingDateList.length == 0 && SalaryList.length == 0 && skillsList.length == 0) 
+            {
+                document.getElementById('resultLocation').innerHTML = '<b>No data found</b>';
+            } 
+            else 
+            {
+                const JobTitleHTML = JobTitleList.map(JobTitle1 => `<li>${JobTitle1}</li>`).join('');
+                const JobPostingDateHTML = JobPostingDateList.map(JobPostingDate1 => `<li>${JobPostingDate1}</li>`).join('');
+                const SalaryHTML = SalaryList.map(Salary1 => `<li>${Salary1}</li>`).join('');
+                const skillsHTML = skillsList.map(skills1 => `<li>${skills1}</li>`).join('');
+                document.getElementById('resultLocation').innerHTML = `<h3>Job Title:</h3><ul>${JobTitleHTML}</ul> <h3>Job Posting Dates:</h3><ul>${JobPostingDateHTML}</ul> <h3>Salary:</h3><ul>${SalaryHTML}</ul> <h3>Skills:</h3><ul>${skillsHTML}</ul>`;
+            }
+        }
+
+        async function submitBenefitForm(event) {
+            event.preventDefault();
+            const JobTitle = document.getElementById('JobTitle').value;
+            const jobRole = document.getElementById('jobRoleBenefit').value;
+            const EmpSalary = document.getElementById('EmpSalary').value;
+            const EmpLocation = document.getElementById('EmpLocationBenefit').value;
+            const EmpExperience = document.getElementById('EmpExperience').value;
+
+            if (!JobTitle.trim() || !jobRole.trim() || !EmpSalary.trim() || !EmpLocation.trim() || !EmpExperience.trim()) {
+                alert('All fields are required!');
+                return;
+            }
+            
+            const response = await fetch('http://localhost:3000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    queryType: 'fullQuery',
+                    userjobTitle: JobTitle,
+                    userjobRole: jobRole,
+                    userEmpSalary: EmpSalary,
+                    userEmpLocation: EmpLocation,
+                    userEmpExperience: EmpExperience
+                }),
+            });
+
+            const result = await response.json();
+            const benefitsList = result.map(item => item.Benefits).flat(); // Extract all Benefits arrays and flatten them
+            if (benefitsList.length == 0) 
+            {
+                document.getElementById('resultBenefit').innerHTML = '<b>No data found</b>';
+            } 
+            else 
+            {
+            const benefitsHTML = benefitsList.map(benefit => `<li>${benefit}</li>`).join('');
+            document.getElementById('resultBenefit').innerHTML = `<ul>${benefitsHTML}</ul>`;
+            }
+        }
+    </script>
+</body>
+</html>
